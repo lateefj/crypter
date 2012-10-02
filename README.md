@@ -11,19 +11,22 @@ Usage:
 ------
 
 1a. First generate a key
-crypter -gen > /tmp/test.key # Uses standard out
+<pre><code>crypter -gen > /tmp/test.key # Uses standard out</code></pre>
 
 1b. Gerate key with base64 output and passing the file as a param
-crypter -gen -b64out -out="/tmp/b64test.key"
+<pre><code>crypter -gen -b64out -out="/tmp/b64test.key"</code></pre>
+
 
 2. Create some data
-echo "This is an experiment" > /tmp/data.txt
+<pre><code>echo "This is an experiment" > /tmp/data.txt</code></pre>
+
 
 3. Encrypt data with the a key
-crypter -enc -key="/tmp/test.key" -in="/tmp/data.txt" -out="/tmp/enc_data.txt"
+<pre><code>crypter -enc -key="/tmp/test.key" -in="/tmp/data.txt" -out="/tmp/enc_data.txt"</code></pre>
+
 
 4. Decrypt data with the key
-crypter -dec -key="/tmp/test.key" -in="/tmp/enc_data.txt"-out="/tmp/dec_data.txt"
+<pre><code>crypter -dec -key="/tmp/test.key" -in="/tmp/enc_data.txt"-out="/tmp/dec_data.txt"</code></pre>
 
 
 TODO:
