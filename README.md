@@ -26,8 +26,10 @@ Usage:
 
 
 4. Decrypt data with the key
-<pre><code>crypter -dec -key="/tmp/test.key" -in="/tmp/enc_data.txt"-out="/tmp/dec_data.txt"</code></pre>
+<pre><code>crypter -dec -key="/tmp/test.key" -in="/tmp/enc_data.txt" -out="/tmp/dec_data.txt"</code></pre>
 
+
+Standard out will be used if there is no -out parameter
 
 TODO:
 -----
