@@ -112,7 +112,7 @@ func encrypt(block cipher.Block, iv []byte, in io.Reader, out io.Writer) {
 	stream := cipher.NewCBCEncrypter(block, iv)
 	for {
 		plain := make([]byte, block.BlockSize())
-		s, err := in.Read(plain)
+		_, err := in.Read(plain)
 		if err != nil && err != io.EOF {
 			fmt.Println("FAILED: Encrypter to read input fil: ", err)
 			os.Exit(-1)
@@ -120,7 +120,7 @@ func encrypt(block cipher.Block, iv []byte, in io.Reader, out io.Writer) {
 		cryptic := make([]byte, block.BlockSize())
 		stream.CryptBlocks(cryptic, plain)
 		out.Write(cryptic)
-		if s < block.BlockSize() || err == io.EOF {
+		if err == io.EOF {
 			break
 		}
 	}
@@ -137,9 +137,8 @@ func decrypt(block cipher.Block, iv []byte, in io.Reader, out io.Writer) {
 		}
 		plain := make([]byte, block.BlockSize())
 		stream.CryptBlocks(plain, cryptic)
-		// Need to trim off any extra padding bits 
-		out.Write(bytes.TrimRight(plain[:s], string(0)))
-		if s < block.BlockSize() || err == io.EOF {
+		out.Write(plain[:s]) // Don't need to write out non ready blocks
+		if err == io.EOF {
 			break
 		}
 	}

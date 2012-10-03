@@ -27,7 +27,7 @@ func TestWriteEncryptDecrypt(t *testing.T) {
 	h := &header{}
 	h.Version = int64(1)
 	h.IV = genIV()
-	data := []byte("this is a test used to see if encryption and decryption is working right. I wonder...")
+	data := []byte("this is a test for bytes...")
 	block, err := aes.NewCipher(genKey(32))
 	if err != nil {
 		t.Errorf("Error trying to create cipher", err)
@@ -37,13 +37,16 @@ func TestWriteEncryptDecrypt(t *testing.T) {
 	in.Write(data)
 	encrypt(block, h.IV, in, out)
 	e := out.Bytes()
+	println("Length of encrypted bytes is ", len(e))
 	if bytes.Equal(data, e) {
 		t.Errorf(fmt.Sprint("Encryption did not happen bytes are the same expected '", string(data), "' to not eqaul '", string(e), "'"))
 	}
 	in.Reset()
 	decrypt(block, h.IV, out, in)
-	d := in.Bytes()
+	d := make([]byte, len(data))
+	in.Read(d)
 	if !bytes.Equal(d, data) {
+		println("OK length of d is ", len(d), " and data length is ", len(data))
 		t.Errorf(fmt.Sprint("Decryptiong did not happen bytes are the different expected '", string(data), "' but got '", string(d), "'", " compare says: ", bytes.Compare(d, data)))
 	}
 }
