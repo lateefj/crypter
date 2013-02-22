@@ -5,7 +5,7 @@ Simple commandline encryption tool written in Go. Example of how to use AES encr
 
 Install:
 --------
-go install https://github.com/lateefj/crypter.git
+go get github.com/lateefj/crypter
 
 Usage:
 ------
