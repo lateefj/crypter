@@ -1,4 +1,4 @@
-package main
+package lib
 
 import (
 	"bytes"
@@ -8,13 +8,13 @@ import (
 )
 
 func TestWriteReadHeader(t *testing.T) {
-	h := &header{}
+	h := &Header{}
 	h.Version = int64(1)
-	h.IV = genIV()
+	h.IV = GenIV()
 	b := bytes.NewBuffer(make([]byte, 0))
-	writeHeader(h, b)
+	WriteHeader(h, b)
 
-	nh := readHeader(b)
+	nh := ReadHeader(b)
 	if h.Version != nh.Version {
 		t.Errorf("Expected version to be", h.Version, "but was", nh.Version)
 	}
@@ -24,25 +24,25 @@ func TestWriteReadHeader(t *testing.T) {
 	}
 }
 func TestWriteEncryptDecrypt(t *testing.T) {
-	h := &header{}
+	h := &Header{}
 	h.Version = int64(1)
-	h.IV = genIV()
+	h.IV = GenIV()
 	data := []byte("this is a test for bytes...")
-	block, err := aes.NewCipher(genKey(32))
+	block, err := aes.NewCipher(GenKey(32))
 	if err != nil {
 		t.Errorf("Error trying to create cipher", err)
 	}
 	in := bytes.NewBuffer(make([]byte, 0))
 	out := bytes.NewBuffer(make([]byte, 0))
 	in.Write(data)
-	encrypt(block, h.IV, in, out)
+	Encrypt(block, h.IV, in, out)
 	e := out.Bytes()
 	println("Length of encrypted bytes is ", len(e))
 	if bytes.Equal(data, e) {
 		t.Errorf(fmt.Sprint("Encryption did not happen bytes are the same expected '", string(data), "' to not eqaul '", string(e), "'"))
 	}
 	in.Reset()
-	decrypt(block, h.IV, out, in)
+	Decrypt(block, h.IV, out, in)
 	d := make([]byte, len(data))
 	in.Read(d)
 	if !bytes.Equal(d, data) {
