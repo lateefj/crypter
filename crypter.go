@@ -1,12 +1,12 @@
 package main
 
 import (
+	"encoding/base64"
+	"flag"
+	"fmt"
+	"github.com/lateefj/crypter/capi"
 	"io"
 	"os"
-	"fmt"
-	"flag"
-	"encoding/base64"
-	"./lib"
 )
 
 var generate = flag.Bool("gen", false, "Generate a random 256 bit key")
@@ -58,7 +58,7 @@ func main() {
 
 	// If we are going to generate or do encryption / decryption
 	if *generate {
-		output := lib.GenKey(lib.AES_KEY_SIZE) // Pretty standard size
+		output := capi.GenKey(capi.AES_KEY_SIZE) // Pretty standard size
 		l, err := fout.Write(output)
 		if err != nil {
 			fmt.Println("Could not write to file with path", out)
@@ -79,16 +79,16 @@ func main() {
 			os.Exit(-1)
 		}
 
-		block := lib.ReadKey(keyIn)
+		block := capi.ReadKey(keyIn)
 		if *encMode {
-			iv := lib.GenIV()
-			h := &lib.Header{int64(1), iv}
-			lib.WriteHeader(h, fout)
-			lib.Encrypt(block, h.IV, fin, fout)
+			iv := capi.GenIV()
+			h := &capi.Header{int64(1), iv}
+			capi.WriteHeader(h, fout)
+			capi.Encrypt(block, h.IV, fin, fout)
 		}
 		if *decMode {
-			h := lib.ReadHeader(fin)
-			lib.Decrypt(block, h.IV, fin, fout)
+			h := capi.ReadHeader(fin)
+			capi.Decrypt(block, h.IV, fin, fout)
 		}
 	}
 }
