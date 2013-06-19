@@ -1,4 +1,4 @@
-package lib
+package capi
 
 import (
 	"bytes"

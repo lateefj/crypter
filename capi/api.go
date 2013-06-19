@@ -1,4 +1,4 @@
-package lib
+package capi
 
 import (
 	"bytes"
@@ -42,7 +42,7 @@ func WriteHeader(h *Header, file io.Writer) {
 
 func ReadHeader(file io.Reader) *Header {
 	h := &Header{}
-	// First get version of 
+	// First get version of
 	data := make([]byte, VERSION_BYTES)
 	s, err := file.Read(data)
 	if s != VERSION_BYTES {
