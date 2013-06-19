@@ -1,6 +1,8 @@
 crypter
 =======
 
+[![Travis Build Status](https://api.travis-ci.org/lateefj/crypter.png?branch=master)](https://travis-ci.org/lateefj/crypter)
+
 Simple commandline encryption tool written in Go. Example of how to use AES encryption in Go (golang). I was motivated to build this to have a base64 output so I could pass as a parameter a one time use key to my server build scripts.
 
 Install:
