@@ -79,15 +79,18 @@ func main() {
 			os.Exit(-1)
 		}
 
-		block := capi.ReadKey(keyIn)
+		block, err := capi.ReadKey(keyIn)
+		if err != nil {
+			fmt.Printf("Error reading the key %s\n", err)
+		}
 		if *encMode {
 			iv := capi.GenIV()
 			h := capi.NewHeader(iv)
-			err := capi.WriteHeader(h, fout)
+			err = capi.WriteHeader(h, fout)
 			if err != nil {
 				fmt.Printf("Error writing header %s\n", err)
 			}
-			err := capi.Encrypt(block, h.IV, fin, fout)
+			err = capi.Encrypt(block, h.IV, fin, fout)
 			if err != nil {
 				fmt.Printf("Error encrypting output %s\n", err)
 			}
