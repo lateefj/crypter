@@ -13,7 +13,10 @@ func TestWriteReadHeader(t *testing.T) {
 	b := bytes.NewBuffer(make([]byte, 0))
 	WriteHeader(h, b)
 
-	nh := ReadHeader(b)
+	nh, err := ReadHeader(b)
+	if err != nil {
+		t.Errorf("Did not expect error when reading the header %s", err)
+	}
 	if h.Version != nh.Version {
 		t.Errorf("Expected version to be", h.Version, "but was", nh.Version)
 	}

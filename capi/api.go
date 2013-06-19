@@ -5,9 +5,9 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"io"
-	"os"
 	"strconv"
 )
 
@@ -28,24 +28,28 @@ func NewHeader(iv []byte) *Header {
 	return &Header{VERSION, iv}
 }
 
-func WriteHeader(h *Header, file io.Writer) {
+func WriteHeader(h *Header, file io.Writer) error {
 	data := bytes.NewBuffer(make([]byte, 0))
 	data.Write([]byte(strconv.FormatInt(h.Version, 10)))
 	data.Write(h.IV)
 	dataSize := data.Len()
 	if dataSize != VERSION_BYTES+IV_BYTES {
-		fmt.Println("ERROR: got unexpected header length of", dataSize)
+		msg := fmt.Sprintf("ERROR: got unexpected header length of %s", dataSize)
+		return errors.New(msg)
 	}
 	s, err := data.WriteTo(file)
 	if err != nil {
-		fmt.Println("ERROR: In WriteTo of buffer", err)
+		fmt.Printf("ERROR: In WriteTo of buffer %s\n", err)
+		return err
 	}
 	if int(s) != dataSize {
-		fmt.Println("ERROR: Expected total header bytes written to be", dataSize, " however it was ", s)
+		msg := fmt.Sprintf("ERROR: Expected total header bytes written to be %d however it was %d", dataSize, s)
+		return errors.New(msg)
 	}
+	return nil
 }
 
-func ReadHeader(file io.Reader) *Header {
+func ReadHeader(file io.Reader) (*Header, error) {
 	h := &Header{}
 	// First get version of
 	data := make([]byte, VERSION_BYTES)
@@ -55,23 +59,18 @@ func ReadHeader(file io.Reader) *Header {
 	}
 	h.Version, err = strconv.ParseInt(string(data), 10, 64)
 	if err != nil {
-		fmt.Println("ERROR: Could not parse version in file format")
-		return nil
+		return nil, err
 	}
 
-	if err != nil {
-		fmt.Println("ERROR: Could not parse file size in file format")
-		return nil
-	}
 	// Now get the vi
 	data = make([]byte, IV_BYTES)
 	s, err = file.Read(data)
 	if s != IV_BYTES {
-		fmt.Println("ERROR: File size expected to have read", IV_BYTES, " but ony read ", s)
+		msg := fmt.Sprintf("ERROR: File size expected to have read %d but ony read %d", IV_BYTES, s)
+		return nil, errors.New(msg)
 	}
 	h.IV = data
-
-	return h
+	return h, nil
 }
 
 // Generate a random key that takes the size as a param
@@ -91,58 +90,64 @@ func GenIV() []byte {
 }
 
 // This takes an io.Reader to load the key. Expecting this to be from a file or stdin
-func ReadKey(in io.Reader) cipher.Block {
+func ReadKey(in io.Reader) (cipher.Block, error) {
 	key := make([]byte, AES_KEY_SIZE)
 	r, err := in.Read(key)
 	if err != nil {
 		fmt.Println("FAILED: Trying to read key file", err)
-		os.Exit(-1)
+		return nil, err
 	}
 	if r != AES_KEY_SIZE {
-		fmt.Println("FAILED: Expected to be able to read", AES_KEY_SIZE, "bytes but read", r)
-		os.Exit(-1)
+		msg := fmt.Sprintf("FAILED: Expected to be able to read %d bytes but read %d", AES_KEY_SIZE, r)
+		return nil, errors.New(msg)
 	}
 	c, err := aes.NewCipher(key)
 	if err != nil {
-		fmt.Println("FAILED: to create cipher: ", err)
-		os.Exit(-1)
+		return nil, err
 	}
-	return c
+	return c, nil
 }
 
 // Based on the block read the input and write ecrypted to the output
-func Encrypt(block cipher.Block, iv []byte, in io.Reader, out io.Writer) {
+func Encrypt(block cipher.Block, iv []byte, in io.Reader, out io.Writer) error {
 	stream := cipher.NewCBCEncrypter(block, iv)
 	for {
 		plain := make([]byte, block.BlockSize())
 		_, err := in.Read(plain)
 		if err != nil && err != io.EOF {
-			fmt.Println("FAILED: Encrypter to read input fil: ", err)
-			os.Exit(-1)
+			fmt.Println("FAILED: Encrypter to read input file: ", err)
+			return err
 		}
 		cryptic := make([]byte, block.BlockSize())
 		stream.CryptBlocks(cryptic, plain)
-		out.Write(cryptic)
+		_, oErr := out.Write(cryptic)
 		if err == io.EOF {
 			break
 		}
+		if oErr != nil {
+			return oErr
+		}
 	}
+	return nil
 }
 
-func Decrypt(block cipher.Block, iv []byte, in io.Reader, out io.Writer) {
+func Decrypt(block cipher.Block, iv []byte, in io.Reader, out io.Writer) error {
 	stream := cipher.NewCBCDecrypter(block, iv)
 	for {
 		cryptic := make([]byte, block.BlockSize())
 		s, err := in.Read(cryptic)
 		if err != nil && err != io.EOF {
-			fmt.Println("FAILED: Decrypter to read input file: ", err)
-			os.Exit(-1)
+			return err
 		}
 		plain := make([]byte, block.BlockSize())
 		stream.CryptBlocks(plain, cryptic)
-		out.Write(plain[:s]) // Don't need to write out non ready blocks
+		_, oError := out.Write(plain[:s]) // Don't need to write out non ready blocks
 		if err == io.EOF {
 			break
 		}
+		if oError != nil {
+			return oError
+		}
 	}
+	return nil
 }

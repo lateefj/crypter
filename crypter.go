@@ -83,11 +83,20 @@ func main() {
 		if *encMode {
 			iv := capi.GenIV()
 			h := capi.NewHeader(iv)
-			capi.WriteHeader(h, fout)
-			capi.Encrypt(block, h.IV, fin, fout)
+			err := capi.WriteHeader(h, fout)
+			if err != nil {
+				fmt.Printf("Error writing header %s\n", err)
+			}
+			err := capi.Encrypt(block, h.IV, fin, fout)
+			if err != nil {
+				fmt.Printf("Error encrypting output %s\n", err)
+			}
 		}
 		if *decMode {
-			h := capi.ReadHeader(fin)
+			h, err := capi.ReadHeader(fin)
+			if err != nil {
+				fmt.Printf("Error reading the header in the input %s\n", err)
+			}
 			capi.Decrypt(block, h.IV, fin, fout)
 		}
 	}
