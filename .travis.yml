@@ -3,4 +3,4 @@ go:
   - 1.0
   - 1.1
   - tip
-script: go test; cd lib; go test
+script: go test && cd capi && go test
