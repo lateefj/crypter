@@ -82,7 +82,7 @@ func main() {
 		block := capi.ReadKey(keyIn)
 		if *encMode {
 			iv := capi.GenIV()
-			h := &capi.Header{int64(1), iv}
+			h := capi.NewHeader(iv)
 			capi.WriteHeader(h, fout)
 			capi.Encrypt(block, h.IV, fin, fout)
 		}

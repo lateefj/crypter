@@ -8,9 +8,8 @@ import (
 )
 
 func TestWriteReadHeader(t *testing.T) {
-	h := &Header{}
-	h.Version = int64(1)
-	h.IV = GenIV()
+	iv := GenIV()
+	h := NewHeader(iv)
 	b := bytes.NewBuffer(make([]byte, 0))
 	WriteHeader(h, b)
 
@@ -24,9 +23,8 @@ func TestWriteReadHeader(t *testing.T) {
 	}
 }
 func TestWriteEncryptDecrypt(t *testing.T) {
-	h := &Header{}
-	h.Version = int64(1)
-	h.IV = GenIV()
+	iv := GenIV()
+	h := NewHeader(iv)
 	data := []byte("this is a test for bytes...")
 	block, err := aes.NewCipher(GenKey(32))
 	if err != nil {

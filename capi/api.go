@@ -16,11 +16,16 @@ const (
 	VERSION_BYTES     = 1
 	IV_BYTES          = 16
 	AES_KEY_SIZE      = 32
+	VERSION           = int64(1)
 )
 
 type Header struct {
 	Version int64
 	IV      []byte
+}
+
+func NewHeader(iv []byte) *Header {
+	return &Header{VERSION, iv}
 }
 
 func WriteHeader(h *Header, file io.Writer) {
