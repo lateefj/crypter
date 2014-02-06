@@ -2,5 +2,6 @@ language: go
 go:
   - 1.0
   - 1.1
+  - 1.2
   - tip
-script: go test && cd capi && go test
+script: cd capi && go test -v
