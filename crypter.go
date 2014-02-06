@@ -7,7 +7,7 @@ import (
   "io"
   "os"
 
-  "./capi"
+  "github.com/lateefj/crypter/capi"
 )
 
 var generate = flag.Bool("gen", false, "Generate a random 256 bit key")
